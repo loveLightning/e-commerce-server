@@ -1,6 +1,5 @@
 import { faker } from '@faker-js/faker'
 import {
-  BadRequestException,
   HttpException,
   HttpStatus,
   Injectable,
@@ -17,7 +16,7 @@ import { UserDto } from './user.dto'
 export class UsersService {
   constructor(private prisma: PrismaService) {}
 
-  async findForEmail(email: string): Promise<any> {
+  async findForEmail(email: string) {
     return await this.prisma.user.findUnique({
       where: {
         email,
@@ -68,46 +67,38 @@ export class UsersService {
 
     return await this.prisma.user.create({
       data: {
+        role: 'ADMIN' as const,
         email: userDto.email,
         password: await hash(userDto.password),
         name: faker.name.firstName(),
-        avatarPath: faker.image.avatar(),
+        avatarPath: '',
         phone: faker.phone.number('+7 (###) ###-##-##'),
         activationLink: '',
       },
     })
   }
 
-  async updateProfile(userId: number, dtoUser: UserDto): Promise<User> {
-    const isExistUser: User = await this.findForEmail(dtoUser.email)
-
-    if (isExistUser && userId !== isExistUser.id) {
-      throw new BadRequestException('Email already exist')
+  async updateProfile(userId: number, dtoUser: UserDto) {
+    const updateFileds: Prisma.UserUpdateInput = {
+      name: dtoUser.name,
+      phone: dtoUser.phone,
     }
-
-    const user = await this.findForId(userId)
-
-    return await this.prisma.user.update({
-      where: {
-        id: userId,
-      },
-      data: {
-        email: dtoUser.email,
-        name: dtoUser.name,
-        avatarPath: dtoUser.avatarPath,
-        phone: dtoUser.phone,
-        password: dtoUser.password
-          ? await hash(dtoUser.password)
-          : user.password,
-      },
-    })
+    await this.updateFileds(userId, updateFileds)
   }
 
-  async toggleFavorite(userId: number, productId: number): Promise<any> {
+  async updateAvatar(userId: number, avatarPath: string) {
+    const updateFileds: Prisma.UserUpdateInput = {
+      avatarPath: avatarPath,
+    }
+
+    await this.updateFileds(userId, updateFileds)
+  }
+
+  async toggleFavorite(userId: number, productId: number) {
     const user = await this.findForId(userId)
 
     if (!user) throw new NotFoundException('Email not found')
-    const isExists = user.favorites.some((el) => el.id === userId)
+    const isExists = user.favorites.some((el) => el.id === productId)
 
     await this.prisma.user.update({
       where: {
@@ -120,6 +111,15 @@ export class UsersService {
           },
         },
       },
+    })
+  }
+
+  private async updateFileds(userId: number, fields: Prisma.UserUpdateInput) {
+    await this.prisma.user.update({
+      where: {
+        id: userId,
+      },
+      data: fields,
     })
   }
 }

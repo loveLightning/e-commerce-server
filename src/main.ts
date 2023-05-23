@@ -8,7 +8,7 @@ import * as cookieParser from 'cookie-parser'
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     cors: {
-      origin: process.env.CLIENT_URL,
+      origin: [process.env.CLIENT_URL, process.env.ADMIN_URL],
       credentials: true,
     },
   })
@@ -31,6 +31,6 @@ async function bootstrap() {
 
   const prismaService = app.get(PrismaService)
   await prismaService.enableShutdownHooks(app)
-  await app.listen(3001)
+  await app.listen(process.env.PORT || 4000)
 }
 bootstrap()

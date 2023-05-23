@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common'
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common'
 import { Prisma } from '@prisma/client'
 import { titleToSlug } from 'src/common/utils/slug'
 import { PrismaService } from 'src/services/prisma/prisma.service'
@@ -9,6 +14,7 @@ import {
   returnFullOfproductObj,
   returnProductObj,
 } from './return.product.object'
+import { CreateProductDto } from './dtos/create-product.dto'
 
 @Injectable()
 export class ProductService {
@@ -18,20 +24,19 @@ export class ProductService {
   ) {}
 
   async getAll(productsDto: GetAllProductDto = {}) {
-    const { searchTerm, sort } = productsDto
+    const { searchTerm, sort, slug } = productsDto
 
     const prismaSort: Prisma.ProductOrderByWithRelationInput[] = []
 
     if (sort === EnumProductSort.HIGH_PRICE) {
       prismaSort.push({ price: 'desc' })
-    } else if (sort === EnumProductSort.LOWE_PRICE) {
+    } else if (sort === EnumProductSort.LOW_PRICE) {
       prismaSort.push({ price: 'asc' })
     } else if (sort === EnumProductSort.NEWEST) {
-      prismaSort.push({ createdAt: 'asc' })
-    } else {
       prismaSort.push({ createdAt: 'desc' })
+    } else {
+      prismaSort.push({ createdAt: 'asc' })
     }
-
     const prismaSearchTermFilter: Prisma.ProductWhereInput = searchTerm
       ? {
           OR: [
@@ -59,23 +64,38 @@ export class ProductService {
         }
       : {}
 
+    const prismaSearchSlug: Prisma.ProductWhereInput = slug
+      ? {
+          slug,
+        }
+      : {}
     const { perPage, skip } = await this.paginationService.getPagination(
       productsDto,
     )
 
+    const productsCount = await this.prisma.product.count({
+      where: {
+        ...prismaSearchSlug,
+        ...prismaSearchTermFilter,
+      },
+    })
+
     const products = await this.prisma.product.findMany({
-      where: prismaSearchTermFilter,
+      where: {
+        ...prismaSearchTermFilter,
+        category: {
+          ...prismaSearchSlug,
+        },
+      },
       orderBy: prismaSort,
-      skip,
-      take: perPage,
+      skip: +skip,
+      take: +perPage,
       select: returnProductObj,
     })
 
     return {
       products,
-      length: await this.prisma.product.count({
-        where: prismaSearchTermFilter,
-      }),
+      length: productsCount,
     }
   }
 
@@ -148,13 +168,33 @@ export class ProductService {
     return products
   }
 
-  async createProduct() {
+  async createProduct(productPath: string, createProductDto: CreateProductDto) {
+    const { category, desc, name, price } = createProductDto
+
+    const existProduct = await this.getByName(name)
+
+    if (existProduct) {
+      throw new HttpException('Product already exists', HttpStatus.CONFLICT)
+    }
+
     const product = await this.prisma.product.create<Prisma.ProductCreateArgs>({
       data: {
-        description: 'ddassdsads',
-        name: 'ddsdassaddasas',
-        price: 1122,
-        slug: 'dddassdss',
+        description: desc,
+        name: name,
+        price: +price,
+        slug: titleToSlug(name),
+        images: [productPath],
+        category: {
+          connectOrCreate: {
+            where: {
+              name: category,
+            },
+            create: {
+              name: category,
+              slug: titleToSlug(category),
+            },
+          },
+        },
       },
     })
     return product.id
@@ -194,6 +234,14 @@ export class ProductService {
     return this.prisma.product.delete({
       where: {
         id: productId,
+      },
+    })
+  }
+
+  private async getByName(name: string) {
+    return this.prisma.product.findUnique({
+      where: {
+        name: name.trim(),
       },
     })
   }

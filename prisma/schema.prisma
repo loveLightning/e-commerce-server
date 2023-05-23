@@ -24,13 +24,15 @@ model User {
   avatarPath     String    @default("/upload/default-avatar.png") @map("avatar_path")
   phone          String    @default("")
   id             Int       @id @default(autoincrement())
-  isActivated    Boolean   @default(false)
-  activationLink String
+  activationLink String    @map("activation_link")
+  isActivated    Boolean   @default(false) @map("is_activated")
+  tokenId        Int?      @unique @map("token_id")
   orders         Order[]
   favorites      Product[]
   reviews        Review[]
   token          Token?    @relation(fields: [tokenId], references: [id])
-  tokenId        Int?      @unique
+  carts          Cart[]
+  role           Role      @default(CLIENT)
 }
 
 model Product {
@@ -48,6 +50,7 @@ model Product {
   category    Category?   @relation(fields: [categoryId], references: [id])
   user        User?       @relation(fields: [userId], references: [id])
   reviews     Review[]
+  cartItems   CartItem[]
 }
 
 model Category {
@@ -75,22 +78,43 @@ model Order {
   id        Int                 @id @default(autoincrement())
   createdAt DateTime            @default(now()) @map("created_at")
   updatedAt DateTime            @updatedAt @map("updated_at")
+  total     Int
   status    EnumOrderItemStatus @default(PENDING)
   userId    Int                 @map("user_id")
   user      User                @relation(fields: [userId], references: [id])
-  item      OrderItem[]
+  items     OrderItem[]
 }
 
 model OrderItem {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
-  quntity   Int
+  quantity  Int
   price     Int
   orderId   Int?     @map("order_id")
   productId Int      @map("product_id")
   order     Order?   @relation(fields: [orderId], references: [id])
+  product   Product? @relation(fields: [productId], references: [id])
+}
+
+model Cart {
+  id        Int        @id @default(autoincrement())
+  createdAt DateTime   @default(now()) @map("created_at")
+  updatedAt DateTime   @updatedAt @map("updated_at")
+  userId    Int
+  user      User       @relation(fields: [userId], references: [id])
+  cartItems CartItem[]
+}
+
+model CartItem {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  cartId    Int
+  cart      Cart     @relation(fields: [cartId], references: [id])
+  productId Int
   product   Product  @relation(fields: [productId], references: [id])
+  quantity  Int
 }
 
 enum EnumOrderItemStatus {
@@ -98,4 +122,9 @@ enum EnumOrderItemStatus {
   PAYED
   SHIPED
   DELIVERED
+}
+
+enum Role {
+  CLIENT
+  ADMIN
 }

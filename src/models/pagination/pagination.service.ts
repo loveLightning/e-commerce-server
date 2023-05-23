@@ -8,10 +8,10 @@ export class PaginationService {
 
   async getPagination(
     paginationDto: PaginationDto,
-    defaultPerPage: number = 30,
+    defaultPerPage: number = 8,
   ): Promise<PaginationTypes> {
-    const page = +paginationDto.page ?? 1
-    const perPage = +paginationDto.perPage ?? defaultPerPage
+    const page = paginationDto.page ?? 1
+    const perPage = paginationDto.perPage ?? defaultPerPage
 
     const skip = (page - 1) * perPage
 

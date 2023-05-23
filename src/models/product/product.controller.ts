@@ -2,17 +2,30 @@ import {
   Body,
   Controller,
   Delete,
+  FileTypeValidator,
   Get,
+  MaxFileSizeValidator,
   Param,
+  ParseFilePipe,
   Post,
   Put,
   Query,
+  Res,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common'
-import { JwtAuthGuard } from '../auth/jwt-auth.guard'
+import { JwtGuard } from '../auth/jwt.guard'
 import { GetAllProductDto } from './dtos/get-all-product.dto'
 import { ProductDto } from './dtos/product.dto'
 import { ProductService } from './product.service'
+import { Roles } from '../auth/roles.decorator'
+import { RolesGuard } from '../auth/role.guard'
+import { FileInterceptor } from '@nestjs/platform-express'
+import { storage } from 'src/common/utils/storage'
+import { CreateProductDto } from './dtos/create-product.dto'
+import { Role } from '@prisma/client'
+import { Response } from 'express'
 
 @Controller('products')
 export class ProductController {
@@ -38,14 +51,37 @@ export class ProductController {
     return this.productService.getByCategory(categorySlug)
   }
 
+  @Get('products/:filename')
+  async getPicture(@Param('filename') filename, @Res() res: Response) {
+    res.sendFile(filename, { root: './uploads/products' })
+  }
+
   @Post()
-  @UseGuards(JwtAuthGuard)
-  async createProduct() {
-    return this.productService.createProduct()
+  @UseGuards(JwtGuard)
+  @Roles(Role.ADMIN)
+  @UseGuards(JwtGuard, RolesGuard)
+  @UseInterceptors(FileInterceptor('file', storage('products')))
+  async createProduct(
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new FileTypeValidator({ fileType: '.(png|jpeg|jpg)' }),
+          new MaxFileSizeValidator({ maxSize: 1024 * 1024 * 4 }),
+        ],
+      }),
+    )
+    file: Express.Multer.File,
+    @Body() createProductDto: CreateProductDto,
+  ) {
+    console.log(createProductDto)
+
+    const productPath = file ? file.filename : null
+
+    return this.productService.createProduct(productPath, createProductDto)
   }
 
   @Put(':id')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtGuard)
   async updateProduct(
     @Param('id') productId: string,
     @Body() productDto: ProductDto,
@@ -54,13 +90,12 @@ export class ProductController {
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtGuard)
   async deleteProduct(@Param('id') id: string) {
     return this.productService.deleteProduct(+id)
   }
 
   @Get(':id')
-  @UseGuards(JwtAuthGuard)
   async getById(@Param('id') id: string) {
     return this.productService.getById(+id)
   }

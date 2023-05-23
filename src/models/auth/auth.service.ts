@@ -6,7 +6,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
-import { User } from '@prisma/client'
+import { Role, User } from '@prisma/client'
 import { verify } from 'argon2'
 import { PrismaService } from 'src/services/prisma/prisma.service'
 import { UsersService } from '../user/user.service'
@@ -31,13 +31,19 @@ export class AuthService {
 
     if (!isValid) throw new UnauthorizedException('Invalid password or email')
 
+    if (!user.isActivated)
+      throw new HttpException(
+        'You need to confirm your email address',
+        HttpStatus.FORBIDDEN,
+      )
+
     const { password, ...result } = user
     return result
   }
 
   async register(userDto: RegisterDto) {
     const user = await this.usersService.create(userDto)
-    const tokens = await this.createTokens(user.id)
+    const tokens = await this.createTokens(user.id, user.role)
 
     await this.mailService.sendActivationEmail(
       userDto.email,
@@ -54,9 +60,9 @@ export class AuthService {
 
   async login(userDto: LoginDto) {
     const { email } = userDto
-    console.log('das')
     const user = await this.usersService.findForEmail(email)
-    const tokens = await this.createTokens(user.id)
+
+    const tokens = await this.createTokens(user.id, user.role)
 
     await this.saveToken(user.id, tokens.refreshToken)
 
@@ -69,16 +75,19 @@ export class AuthService {
   async refreshToken(refreshToken: string) {
     if (!refreshToken) throw new UnauthorizedException()
     const result = await this.jwtService.verifyAsync(refreshToken)
-
     const user = await this.prisma.user.findUnique({
       where: {
         id: result.id,
       },
     })
-    if (!result || !user)
+
+    const tokenFromDb = await this.findToken(refreshToken)
+
+    if (!result || !user || !tokenFromDb)
       throw new UnauthorizedException('Invalid refresh token')
 
-    const tokens = await this.createTokens(user.id)
+    const tokens = await this.createTokens(user.id, user.role)
+    await this.saveToken(user.id, tokens.refreshToken)
 
     return {
       user: this.returnUserFields(user),
@@ -120,13 +129,7 @@ export class AuthService {
       },
     })
 
-    if (!user) throw new NotFoundException('An uncorrect link activation')
-
-    // if (user.isActivated)
-    //   throw new HttpException(
-    //     'This email has already been activated',
-    //     HttpStatus.CONFLICT,
-    //   )
+    if (!user) throw new NotFoundException('An incorrect link activation')
 
     await this.prisma.user.update({
       where: {
@@ -146,8 +149,8 @@ export class AuthService {
     })
   }
 
-  private async createTokens(userId: number) {
-    const payload = { id: userId }
+  private async createTokens(userId: number, role: Role) {
+    const payload = { id: userId, role }
 
     const accessToken = this.jwtService.sign(payload, {
       expiresIn: '1h',
@@ -160,11 +163,22 @@ export class AuthService {
     return { accessToken, refreshToken }
   }
 
+  private async findToken(refreshToken: string) {
+    const tokenData = await this.prisma.token.findFirst({
+      where: {
+        refreshToken,
+      },
+    })
+
+    return tokenData
+  }
+
   private returnUserFields(user: User) {
     return {
       id: user.id,
       email: user.email,
       isActivated: user.isActivated,
+      role: user.role,
     }
   }
 }

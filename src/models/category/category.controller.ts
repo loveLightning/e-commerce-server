@@ -8,16 +8,20 @@ import {
   Put,
   UseGuards,
 } from '@nestjs/common'
-import { JwtAuthGuard } from '../auth/jwt-auth.guard'
+import { JwtGuard } from '../auth/jwt.guard'
 import { CategoryDto } from './category.dto'
 import { CategoryService } from './category.service'
+import { Roles } from '../auth/roles.decorator'
+import { Role } from '@prisma/client'
+import { RolesGuard } from '../auth/role.guard'
 
 @Controller('categories')
 export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
 
   @Put(':id')
-  @UseGuards(JwtAuthGuard)
+  @Roles(Role.ADMIN)
+  @UseGuards(JwtGuard, RolesGuard)
   async update(
     @Param('id') categoryId: string,
     @Body() categoryDto: CategoryDto,
@@ -26,32 +30,31 @@ export class CategoryController {
   }
 
   @Post()
-  @UseGuards(JwtAuthGuard)
-  async create() {
-    return this.categoryService.create()
+  @Roles(Role.ADMIN)
+  @UseGuards(JwtGuard, RolesGuard)
+  async create(@Body() categoryDto: CategoryDto) {
+    return this.categoryService.create(categoryDto)
   }
 
   @Get()
-  @UseGuards(JwtAuthGuard)
   async getAll() {
     return this.categoryService.getAll()
   }
 
   @Get(':id')
-  @UseGuards(JwtAuthGuard)
   async findById(@Param('id') categoryId: string) {
     return this.categoryService.findById(+categoryId)
   }
 
-  @Get('/by-slug:slug')
-  @UseGuards(JwtAuthGuard)
+  @Get('by-slug/:slug')
   async findBySlug(@Param('slug') slug: string) {
     return this.categoryService.findBySlug(slug)
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard)
+  @Roles(Role.ADMIN)
+  @UseGuards(JwtGuard, RolesGuard)
   async delete(@Param('id') categoryId: string) {
-    return this.categoryService.delete(+categoryId)
+    await this.categoryService.delete(+categoryId)
   }
 }

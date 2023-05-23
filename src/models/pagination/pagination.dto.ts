@@ -3,7 +3,7 @@ import { IsOptional, IsString } from 'class-validator'
 export class PaginationDto {
   @IsOptional()
   @IsString()
-  public readonly page?: string
+  public readonly page?: number
 
   @IsOptional()
   @IsString()

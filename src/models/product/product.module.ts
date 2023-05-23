@@ -3,9 +3,10 @@ import { ProductService } from './product.service'
 import { ProductController } from './product.controller'
 import { PrismaService } from 'src/services/prisma/prisma.service'
 import { PaginationService } from '../pagination/pagination.service'
+import { JwtService } from '@nestjs/jwt'
 
 @Module({
   controllers: [ProductController],
-  providers: [ProductService, PrismaService, PaginationService],
+  providers: [ProductService, PrismaService, PaginationService, JwtService],
 })
 export class ProductModule {}

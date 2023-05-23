@@ -1,19 +1,15 @@
 import { Injectable } from '@nestjs/common'
-import { PrismaService } from 'src/services/prisma/prisma.service'
 import { UsersService } from '../user/user.service'
 
 @Injectable()
 export class StatisticsService {
-  constructor(
-    private prisma: PrismaService,
-    private userService: UsersService,
-  ) {}
+  constructor(private userService: UsersService) {}
 
   async getMain(userId: number) {
     const user = await this.userService.findForId(userId, {
       orders: {
         select: {
-          item: true,
+          items: true,
         },
       },
       reviews: true,

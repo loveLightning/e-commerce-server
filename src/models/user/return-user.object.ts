@@ -7,6 +7,7 @@ export const returnUserObj: Prisma.UserSelect = {
   name: true,
   avatarPath: true,
   phone: true,
+  role: true,
 }
 
 export const returnFavoritesObj = {
