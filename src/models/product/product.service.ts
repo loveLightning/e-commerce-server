@@ -200,32 +200,53 @@ export class ProductService {
     return product.id
   }
 
-  async updateProduct(productId: number, productDto: ProductDto) {
-    const { categoryId, description, images, price, name } = productDto
+  async updateProduct(productId: number, productDto: CreateProductDto) {
+    const { category, desc, price, name } = productDto
 
-    const category = await this.prisma.category.count({
+    const nameExists = await this.prisma.product.findFirst({
       where: {
-        id: categoryId,
+        NOT: {
+          id: productId,
+        },
+        slug: titleToSlug(name),
       },
     })
 
-    if (!category) throw new NotFoundException('Category not found')
+    if (nameExists) {
+      throw new HttpException('Product already exists', HttpStatus.CONFLICT)
+    }
 
     return this.prisma.product.update({
       where: {
         id: productId,
       },
       data: {
-        description,
-        images,
-        price,
+        description: desc,
+        price: +price,
         name,
         slug: titleToSlug(name),
         category: {
-          connect: {
-            id: categoryId,
+          connectOrCreate: {
+            where: {
+              name: category,
+            },
+            create: {
+              name: category,
+              slug: titleToSlug(category),
+            },
           },
         },
+      },
+    })
+  }
+
+  async updateImageOfProduct(productId: number, file: string) {
+    return this.prisma.product.update({
+      where: {
+        id: productId,
+      },
+      data: {
+        images: [file],
       },
     })
   }

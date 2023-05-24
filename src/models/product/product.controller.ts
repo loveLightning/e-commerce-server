@@ -7,6 +7,7 @@ import {
   MaxFileSizeValidator,
   Param,
   ParseFilePipe,
+  Patch,
   Post,
   Put,
   Query,
@@ -82,11 +83,37 @@ export class ProductController {
 
   @Put(':id')
   @UseGuards(JwtGuard)
+  @Roles(Role.ADMIN)
+  @UseGuards(JwtGuard, RolesGuard)
   async updateProduct(
-    @Param('id') productId: string,
-    @Body() productDto: ProductDto,
+    @Param('id')
+    productId: string,
+    @Body() productDto: CreateProductDto,
   ) {
     return this.productService.updateProduct(+productId, productDto)
+  }
+
+  @Patch('productPath/:id')
+  @UseGuards(JwtGuard)
+  @Roles(Role.ADMIN)
+  @UseGuards(JwtGuard, RolesGuard)
+  @UseInterceptors(FileInterceptor('file', storage('products')))
+  async updateImageOfProduct(
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new FileTypeValidator({ fileType: '.(png|jpeg|jpg)' }),
+          new MaxFileSizeValidator({ maxSize: 1024 * 1024 * 4 }),
+        ],
+      }),
+    )
+    file: Express.Multer.File,
+    @Param('id')
+    productId: string,
+  ) {
+    const productPath = file ? file.filename : null
+
+    return this.productService.updateImageOfProduct(+productId, productPath)
   }
 
   @Delete(':id')
