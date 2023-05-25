@@ -7,6 +7,7 @@ import * as cookieParser from 'cookie-parser'
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule)
+
   app.enableCors({
     origin: [
       process.env.CLIENT_URL,
@@ -17,6 +18,7 @@ async function bootstrap() {
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
     allowedHeaders: ['authorization', 'content-type'],
+    exposedHeaders: ['Access-Control-Allow-Origin'], // add this line
   })
 
   app.useGlobalPipes(
