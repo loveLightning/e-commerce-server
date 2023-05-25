@@ -8,7 +8,12 @@ import * as cookieParser from 'cookie-parser'
 async function bootstrap() {
   const app = await NestFactory.create(AppModule)
   app.enableCors({
-    origin: '*',
+    origin: [
+      process.env.CLIENT_URL,
+      process.env.ADMIN_URL,
+      'https://videohosting-next-js-nest-js-admin-86btbkj8n-zaycevnet20.vercel.app',
+      'https://videohosting-next-js-nest-js-client-j3hpnrztb-zaycevnet20.vercel.app',
+    ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
     allowedHeaders: ['authorization', 'content-type'],
