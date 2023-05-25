@@ -9,12 +9,11 @@ import { titleToSlug } from 'src/common/utils/slug'
 import { PrismaService } from 'src/services/prisma/prisma.service'
 import { PaginationService } from '../pagination/pagination.service'
 import { EnumProductSort, GetAllProductDto } from './dtos/get-all-product.dto'
-import { ProductDto } from './dtos/product.dto'
 import {
   returnFullOfproductObj,
   returnProductObj,
 } from './return.product.object'
-import { CreateProductDto } from './dtos/create-product.dto'
+import { ProductDto } from './dtos/product.dto'
 
 @Injectable()
 export class ProductService {
@@ -168,7 +167,7 @@ export class ProductService {
     return products
   }
 
-  async createProduct(productPath: string, createProductDto: CreateProductDto) {
+  async createProduct(productPath: string, createProductDto: ProductDto) {
     const { category, desc, name, price } = createProductDto
 
     const existProduct = await this.getByName(name)
@@ -200,7 +199,7 @@ export class ProductService {
     return product.id
   }
 
-  async updateProduct(productId: number, productDto: CreateProductDto) {
+  async updateProduct(productId: number, productDto: ProductDto) {
     const { category, desc, price, name } = productDto
 
     const nameExists = await this.prisma.product.findFirst({

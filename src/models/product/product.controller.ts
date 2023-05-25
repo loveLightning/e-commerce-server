@@ -18,13 +18,12 @@ import {
 } from '@nestjs/common'
 import { JwtGuard } from '../auth/jwt.guard'
 import { GetAllProductDto } from './dtos/get-all-product.dto'
-import { ProductDto } from './dtos/product.dto'
 import { ProductService } from './product.service'
 import { Roles } from '../auth/roles.decorator'
 import { RolesGuard } from '../auth/role.guard'
 import { FileInterceptor } from '@nestjs/platform-express'
 import { storage } from 'src/common/utils/storage'
-import { CreateProductDto } from './dtos/create-product.dto'
+import { ProductDto } from './dtos/product.dto'
 import { Role } from '@prisma/client'
 import { Response } from 'express'
 
@@ -72,7 +71,7 @@ export class ProductController {
       }),
     )
     file: Express.Multer.File,
-    @Body() createProductDto: CreateProductDto,
+    @Body() createProductDto: ProductDto,
   ) {
     console.log(createProductDto)
 
@@ -88,7 +87,7 @@ export class ProductController {
   async updateProduct(
     @Param('id')
     productId: string,
-    @Body() productDto: CreateProductDto,
+    @Body() productDto: ProductDto,
   ) {
     return this.productService.updateProduct(+productId, productDto)
   }

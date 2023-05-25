@@ -17,29 +17,29 @@ async function bootstrap() {
     ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
-    allowedHeaders: ['authorization', 'content-type'],
+    // allowedHeaders: ['authorization', 'content-type'],
   })
 
   app.useGlobalPipes(
-    new ValidationPipe(/* {
-      transform: true, 
-    } */),
+    new ValidationPipe({
+      transform: true,
+    }),
   )
 
-  app.use((req, res, next) => {
-    res.setHeader('Access-Control-Allow-Origin', '*')
-    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
-    res.header(
-      'Access-Control-Allow-Headers',
-      'Content-Type, Authorization, Content-Length, X-Requested-With',
-    )
-    // intercept OPTIONS method
-    if ('OPTIONS' === req.method) {
-      res.sendStatus(200)
-    } else {
-      next()
-    }
-  })
+  // app.use((req, res, next) => {
+  //   res.setHeader('Access-Control-Allow-Origin', '*')
+  //   res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+  //   res.header(
+  //     'Access-Control-Allow-Headers',
+  //     'Content-Type, Authorization, Content-Length, X-Requested-With',
+  //   )
+  //   // intercept OPTIONS method
+  //   if ('OPTIONS' === req.method) {
+  //     res.sendStatus(200)
+  //   } else {
+  //     next()
+  //   }
+  // })
 
   app.use(cookieParser())
 
