@@ -26,20 +26,23 @@ async function bootstrap() {
     }),
   )
 
-  // app.use((req, res, next) => {
-  //   res.setHeader('Access-Control-Allow-Origin', '*')
-  //   res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
-  //   res.header(
-  //     'Access-Control-Allow-Headers',
-  //     'Content-Type, Authorization, Content-Length, X-Requested-With',
-  //   )
-  //   // intercept OPTIONS method
-  //   if ('OPTIONS' === req.method) {
-  //     res.sendStatus(200)
-  //   } else {
-  //     next()
-  //   }
-  // })
+  app.use((req, res, next) => {
+    res.setHeader(
+      'Access-Control-Allow-Origin',
+      'https://videohosting-next-js-nest-js-admin-86btbkj8n-zaycevnet20.vercel.app, https://videohosting-next-js-nest-js-client-j3hpnrztb-zaycevnet20.vercel.app',
+    )
+    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+    res.header(
+      'Access-Control-Allow-Headers',
+      'Content-Type, Authorization, Content-Length, X-Requested-With',
+    )
+    // intercept OPTIONS method
+    if ('OPTIONS' === req.method) {
+      res.sendStatus(200)
+    } else {
+      next()
+    }
+  })
 
   app.use(cookieParser())
 
