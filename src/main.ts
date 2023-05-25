@@ -18,12 +18,6 @@ async function bootstrap() {
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
     allowedHeaders: ['authorization', 'content-type'],
-    exposedHeaders: ['Access-Control-Allow-Origin'],
-  })
-
-  app.use((req, res, next) => {
-    res.header('Access-Control-Allow-Origin', '*')
-    next()
   })
 
   app.useGlobalPipes(
