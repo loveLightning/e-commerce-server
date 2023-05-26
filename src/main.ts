@@ -27,10 +27,7 @@ async function bootstrap() {
   )
 
   app.use((req, res, next) => {
-    res.setHeader('Access-Control-Allow-Origin', [
-      'https://videohosting-next-js-nest-js-admin-86btbkj8n-zaycevnet20.vercel.app',
-      'https://videohosting-next-js-nest-js-client-j3hpnrztb-zaycevnet20.vercel.app',
-    ])
+    res.setHeader('Access-Control-Allow-Origin', '*')
     res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
     res.header(
       'Access-Control-Allow-Headers',
