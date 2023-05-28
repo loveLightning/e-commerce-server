@@ -31,13 +31,8 @@ export class AuthService {
 
     if (!isValid) throw new UnauthorizedException('Invalid password or email')
 
-    if (!user.isActivated)
-      throw new HttpException(
-        'You need to confirm your email address',
-        HttpStatus.FORBIDDEN,
-      )
-
     const { password, ...result } = user
+
     return result
   }
 
@@ -65,6 +60,18 @@ export class AuthService {
     const tokens = await this.createTokens(user.id, user.role)
 
     await this.saveToken(user.id, tokens.refreshToken)
+
+    if (!user.isActivated) {
+      await this.mailService.sendActivationEmail(
+        email,
+        `${process.env.API_URL}/auth/activate/${tokens.refreshToken}`,
+      )
+
+      throw new HttpException(
+        'You need to confirm your email address',
+        HttpStatus.FORBIDDEN,
+      )
+    }
 
     return {
       user: this.returnUserFields(user),
