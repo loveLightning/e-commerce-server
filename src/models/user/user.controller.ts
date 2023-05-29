@@ -20,6 +20,7 @@ import { JwtGuard } from '../auth/jwt.guard'
 import { FileInterceptor } from '@nestjs/platform-express'
 import { storage } from 'src/common/utils/storage'
 import { Response } from 'express'
+import { returnAddToBasketObj } from './return-user.object'
 
 @Controller('users')
 export class UsersController {
@@ -28,7 +29,11 @@ export class UsersController {
   @Get('profile')
   @UseGuards(JwtGuard)
   async getProfile(@CurrentUser('id') userId: number) {
-    return this.usersService.findForId(userId)
+    return this.usersService.findForId(userId, {
+      carts: {
+        include: returnAddToBasketObj,
+      },
+    })
   }
 
   @Get('profile/:filename')

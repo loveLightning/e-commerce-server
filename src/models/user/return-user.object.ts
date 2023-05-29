@@ -17,3 +17,12 @@ export const returnFavoritesObj = {
   images: true,
   slug: true,
 }
+
+export const returnAddToBasketObj: Prisma.CartSelect = {
+  cartItems: {
+    include: {
+      cart: true,
+      product: true,
+    },
+  },
+}

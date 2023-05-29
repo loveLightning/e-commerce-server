@@ -251,11 +251,13 @@ export class ProductService {
   }
 
   async deleteProduct(productId: number) {
-    return this.prisma.product.delete({
-      where: {
-        id: productId,
-      },
-    })
+    await this.prisma.cartItem.deleteMany({ where: { productId } })
+
+    await this.prisma.orderItem.deleteMany({ where: { productId } })
+
+    await this.prisma.review.deleteMany({ where: { productId } })
+
+    await this.prisma.product.delete({ where: { id: productId } })
   }
 
   private async getByName(name: string) {

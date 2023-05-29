@@ -69,8 +69,8 @@ model Review {
   rating    Int
   text      String
   userId    Int      @map("user_id")
-  productId Int      @map("product_id")
-  product   Product  @relation(fields: [productId], references: [id])
+  productId Int?     @map("product_id")
+  product   Product? @relation(fields: [productId], references: [id])
   user      User     @relation(fields: [userId], references: [id])
 }
 
@@ -92,7 +92,7 @@ model OrderItem {
   quantity  Int
   price     Int
   orderId   Int?     @map("order_id")
-  productId Int      @map("product_id")
+  productId Int?     @map("product_id")
   order     Order?   @relation(fields: [orderId], references: [id])
   product   Product? @relation(fields: [productId], references: [id])
 }
@@ -112,8 +112,8 @@ model CartItem {
   updatedAt DateTime @updatedAt @map("updated_at")
   cartId    Int
   cart      Cart     @relation(fields: [cartId], references: [id])
-  productId Int
-  product   Product  @relation(fields: [productId], references: [id])
+  productId Int?
+  product   Product? @relation(fields: [productId], references: [id])
   quantity  Int
 }
 

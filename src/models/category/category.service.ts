@@ -77,6 +77,15 @@ export class CategoryService {
   }
 
   async delete(categoryId: number) {
+    const products = await this.prisma.product.findMany({
+      where: { categoryId },
+    })
+
+    await Promise.all(
+      products.map((product) =>
+        this.prisma.cartItem.deleteMany({ where: { productId: product.id } }),
+      ),
+    )
     await this.prisma.product.deleteMany({ where: { categoryId } })
     await this.prisma.category.delete({ where: { id: categoryId } })
   }

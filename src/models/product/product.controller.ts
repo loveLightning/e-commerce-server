@@ -73,8 +73,6 @@ export class ProductController {
     file: Express.Multer.File,
     @Body() createProductDto: ProductDto,
   ) {
-    console.log(createProductDto)
-
     const productPath = file ? file.filename : null
 
     return this.productService.createProduct(productPath, createProductDto)

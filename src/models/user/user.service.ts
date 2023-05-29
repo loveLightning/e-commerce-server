@@ -39,6 +39,7 @@ export class UsersService {
             ...returnFavoritesObj,
           },
         },
+
         ...selectObject,
       },
     })
