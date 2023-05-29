@@ -20,6 +20,8 @@ async function bootstrap() {
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
     allowedHeaders: ['authorization', 'content-type'],
+    preflightContinue: true,
+    optionsSuccessStatus: 204,
   })
 
   app.use((req, res, next) => {
