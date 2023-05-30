@@ -71,7 +71,7 @@ export class UsersService {
         role: 'ADMIN' as const,
         email: userDto.email,
         password: await hash(userDto.password),
-        name: faker.name.firstName(),
+        name: faker.person.firstName(),
         avatarPath: 'default-avatar.jpg',
         phone: faker.phone.number('+7 (###) ###-##-##'),
         activationLink: '',
