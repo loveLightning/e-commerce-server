@@ -9,7 +9,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule)
 
   app.enableCors({
-    origin: [process.env.CLIENT_URL, process.env.SERVER_URL],
+    origin: [process.env.CLIENT_URL, process.env.ADMIN_URL],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
     allowedHeaders: ['authorization', 'content-type'],
@@ -20,6 +20,21 @@ async function bootstrap() {
       transform: true,
     }),
   )
+
+  // app.use((req, res, next) => {
+  //   res.setHeader('Access-Control-Allow-Origin', '*')
+  //   res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+  //   res.header(
+  //     'Access-Control-Allow-Headers Access-Control-Allow-Origin',
+  //     'Content-Type, Authorization, Content-Length, X-Requested-With',
+  //   )
+  //   // intercept OPTIONS method
+  //   if ('OPTIONS' === req.method) {
+  //     res.sendStatus(200)
+  //   } else {
+  //     next()
+  //   }
+  // })
 
   app.use(cookieParser())
 

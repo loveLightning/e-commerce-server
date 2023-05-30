@@ -72,7 +72,7 @@ export class UsersService {
         email: userDto.email,
         password: await hash(userDto.password),
         name: faker.name.firstName(),
-        avatarPath: '',
+        avatarPath: 'default-avatar.jpg',
         phone: faker.phone.number('+7 (###) ###-##-##'),
         activationLink: '',
       },
