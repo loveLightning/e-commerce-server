@@ -15,6 +15,11 @@ async function bootstrap() {
     allowedHeaders: ['authorization', 'content-type'],
   })
 
+  app.use((_, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*')
+    next()
+  })
+
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,
