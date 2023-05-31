@@ -25,6 +25,8 @@ async function bootstrap() {
       'Access-Control-Allow-Origin',
       'https://e-commerce-client-and-admin-client.vercel.app',
     )
+    res.header('Access-Control-Allow-Methods', 'POST')
+    res.header('Access-Control-Allow-Headers', 'Content-Type')
     next()
   })
 
