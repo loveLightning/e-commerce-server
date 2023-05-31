@@ -9,14 +9,22 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule)
 
   app.enableCors({
-    origin: [process.env.CLIENT_URL, process.env.ADMIN_URL],
+    origin: [
+      process.env.CLIENT_URL,
+      process.env.ADMIN_URL,
+      'https://e-commerce-client-and-admin-client.vercel.app',
+      'https://e-commerce-client-and-admin-admin.vercel.app',
+    ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
     allowedHeaders: ['authorization', 'content-type'],
   })
 
   app.use((_, res, next) => {
-    res.header('Access-Control-Allow-Origin', process.env.CLIENT_UR)
+    res.header(
+      'Access-Control-Allow-Origin',
+      'https://e-commerce-client-and-admin-client.vercel.app',
+    )
     next()
   })
 
