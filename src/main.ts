@@ -15,27 +15,9 @@ async function bootstrap() {
       'https://e-commerce-client-and-admin-client.vercel.app',
       'https://e-commerce-client-and-admin-admin.vercel.app',
     ],
-    preflightContinue: true,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
-    // allowedHeaders: ['uthorization', 'content-type'],
-  })
-
-  app.use((req, res, next) => {
-    res.header(
-      'Access-Control-Allow-Origin',
-      'https://e-commerce-client-and-admin-client.vercel.app',
-    )
-    res.header('Access-Control-Allow-Credentials', true)
-
-    if (req.method === 'OPTIONS') {
-      res.header(
-        'Access-Control-Allow-Methods',
-        'PUT, POST, PATCH, DELETE, GET',
-      )
-      return res.status(200).json({})
-    }
-    next()
+    preflightContinue: false,
   })
 
   app.useGlobalPipes(
@@ -60,4 +42,5 @@ async function bootstrap() {
   await prismaService.enableShutdownHooks(app)
   await app.listen(process.env.PORT || 4000)
 }
+
 bootstrap()
